@@ -40,17 +40,16 @@ class SoundTab extends React.Component {
     this.state = { selectedSoundIndex: 0 }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    const { editingTarget, sprites, stage } = nextProps
+  componentDidUpdate(prevProps) {
+    const { editingTarget, sprites, stage } = this.props
 
     const target =
       editingTarget && sprites[editingTarget] ? sprites[editingTarget] : stage
     if (!target || !target.sounds) {
       return
     }
-
-    // If switching editing targets, reset the sound index
-    if (this.props.editingTarget !== editingTarget) {
+  
+    if (prevProps.editingTarget !== this.props.editingTarget) {
       this.setState({ selectedSoundIndex: 0 })
     } else if (this.state.selectedSoundIndex > target.sounds.length - 1) {
       this.setState({
