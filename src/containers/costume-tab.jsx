@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import bindAll from 'lodash.bindall'
-import { defineMessages, intlShape, injectIntl } from 'react-intl'
+import { defineMessages, injectIntl } from 'react-intl'
 import VM from 'scratch-vm'
 
 import { connect } from 'react-redux'
@@ -327,7 +327,7 @@ CostumeTab.propTypes = {
   cameraModalVisible: PropTypes.bool,
   costumeLibraryVisible: PropTypes.bool,
   editingTarget: PropTypes.string,
-  intl: intlShape,
+  intl: PropTypes.object,
   onNewCostumeFromCameraClick: PropTypes.func.isRequired,
   onNewLibraryBackdropClick: PropTypes.func.isRequired,
   onNewLibraryCostumeClick: PropTypes.func.isRequired,

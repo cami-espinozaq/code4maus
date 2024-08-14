@@ -6,7 +6,6 @@ const envsub = require('envsubstr')
 
 // Plugins
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const Visualizer = require('webpack-visualizer-plugin')
 const { GenerateSW } = require('workbox-webpack-plugin')
 
 // Custom Plugins
@@ -36,7 +35,16 @@ module.exports = {
   mode: isEnvProduction ? 'production' : 'development',
   devtool: 'source-map',
   devServer: {
-    contentBase: path.resolve(__dirname, 'build'),
+    static: {
+      directory: path.join(__dirname, 'build'),
+      watch:
+        process.env.DOCKER_WATCH === 1
+          ? {
+              aggregateTimeout: 300,
+              poll: 1000,
+            }
+          : {},
+    },
     host: '0.0.0.0',
     port: process.env.PORT || 8601,
     proxy: {
@@ -48,14 +56,7 @@ module.exports = {
         changeOrigin: true,
       },
     },
-    historyApiFallback: true,
-    watchOptions:
-      process.env.DOCKER_WATCH === 1
-        ? {
-            aggregateTimeout: 300,
-            poll: 1000,
-          }
-        : {},
+    historyApiFallback: true
   },
   entry: {
     app: './src/entrypoints/index.jsx',
@@ -67,6 +68,7 @@ module.exports = {
     filename: '[name].[contenthash].js',
     publicPath: '/',
   },
+  target: 'web',
   module: {
     rules: [
       {
@@ -138,20 +140,22 @@ module.exports = {
       },
       {
         test: require.resolve('zepto'),
-        loader: 'imports-loader?this=>window',
+        use: [
+          {
+            loader: 'imports-loader',
+            options: 'this=>window',
+          },
+        ],
       },
     ],
   },
   optimization: {
-    splitChunks: {
-      chunks: 'all',
-    },
+    runtimeChunk: 'single'
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      'process.env.DEBUG': Boolean(process.env.DEBUG),
-      'process.env.ENABLE_TRACKING': Boolean(branch === 'production'),
+      'process.env.DEBUG': 'process.env.DEBUG',
+      'process.env.ENABLE_TRACKING': JSON.stringify(Boolean(branch === 'production')),
       'process.env.BRANCH': JSON.stringify(branch),
     }),
     customHtmlPlugin({
@@ -193,8 +197,8 @@ module.exports = {
         transform: (content) => envsub(content.toString()),
       },
     ]),
-    new Visualizer({
-      filename: 'statistics.html',
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
     }),
   ].concat(
     enableServiceWorker
@@ -223,4 +227,18 @@ module.exports = {
         ]
       : []
   ),
+  resolve: {
+    fallback: {
+      path: false,
+      crypto: false,
+      "stream": false,
+      "buffer": false,
+      fs: false,
+      tls: false,
+      net: false,
+      zlib: false,
+      http: false,
+      https: false,
+    }
+  }
 }

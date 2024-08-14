@@ -1,4 +1,4 @@
-import { injectIntl, intlShape } from 'react-intl'
+import { injectIntl } from 'react-intl'
 import PropTypes from 'prop-types'
 import React from 'react'
 import VM from 'scratch-vm'
@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom'
 import Controls from '../../containers/controls.jsx'
 import Fullscreen from '../../containers/fullscreen.jsx'
 import MenuButton from '../menu-button/menu-button.jsx'
-import { guiTypePages, paEvent } from '../../lib/piano-analytics/main.js'
 
 import styles from './stage-header.css'
 import saveIcon from '!raw-loader!../../../assets/icons/header_save.svg'
@@ -75,7 +74,7 @@ const StageHeaderComponent = function (props) {
 }
 
 StageHeaderComponent.propTypes = {
-  intl: intlShape,
+  intl: PropTypes.object,
   isFullScreen: PropTypes.bool.isRequired,
   gameId: PropTypes.string,
   onSaveProject: PropTypes.func.isRequired,
