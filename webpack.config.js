@@ -125,8 +125,7 @@ module.exports = {
             options: {
               outputPath: 'static/assets/',
             },
-          },
-          'svgo-loader',
+          }
         ],
       },
       {
@@ -172,31 +171,37 @@ module.exports = {
       filename: 'settings/index.html',
       title: 'Einstellungen | Programmieren mit der Maus',
     }),
-    new CopyWebpackPlugin([
-      {
-        from: 'assets/img/favicon.png',
-        to: '',
-      },
-      {
-        from: 'node_modules/scratch-blocks/media',
-        to: 'static/blocks-media',
-        ignore: ['icons/set-*', 'icons/wedo_*', 'extensions/*'],
-      },
-      {
-        from: 'assets/blocks-media',
-        to: 'static/blocks-media',
-      },
-      {
-        from: 'static',
-        to: 'static',
-      },
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: '_redirects',
-        transform: (content) => envsub(content.toString()),
-      },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'assets/img/favicon.png',
+          to: '',
+        },
+        {
+          from: 'node_modules/scratch-blocks/media',
+          to: 'static/blocks-media',
+          globOptions: {
+            ignore: ['icons/set-*', 'icons/wedo_*', 'extensions/*'],
+          }
+        },
+        {
+          from: 'assets/blocks-media',
+          to: 'static/blocks-media',
+        },
+        {
+          from: 'static',
+          to: 'static',
+        },
+      ]
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: '_redirects',
+          transform: (content) => envsub(content.toString()),
+        },
+      ]
+    }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
     }),
