@@ -126,7 +126,7 @@
     "scratch-paint": "2.2.21",
     "scratch-render": "1.0.38",
     "scratch-render-fonts": "^1.0.0",
-    "scratch-storage": "2.3.0",
+    "scratch-storage": "2.3.3",
     "scratch-svg-renderer": "1.0.0",
     "selenium-webdriver": "4.0.0-alpha.1",
     "serverless": "^1.83.3",
