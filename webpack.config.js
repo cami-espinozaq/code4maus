@@ -49,14 +49,16 @@ module.exports = {
     port: process.env.PORT || 8601,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3000/dev',
+        changeOrigin: true,
+        secure: false,
       },
       '/data': {
         target: bucketUrl,
         changeOrigin: true,
       },
     },
-    historyApiFallback: true
+    historyApiFallback: true,
   },
   entry: {
     app: './src/entrypoints/index.jsx',
@@ -125,7 +127,7 @@ module.exports = {
             options: {
               outputPath: 'static/assets/',
             },
-          }
+          },
         ],
       },
       {
@@ -135,7 +137,7 @@ module.exports = {
       {
         test: /\.mjs$/,
         include: /node_modules/,
-        type: 'javascript/auto'
+        type: 'javascript/auto',
       },
       {
         test: require.resolve('zepto'),
@@ -149,12 +151,14 @@ module.exports = {
     ],
   },
   optimization: {
-    runtimeChunk: 'single'
+    runtimeChunk: 'single',
   },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.DEBUG': 'process.env.DEBUG',
-      'process.env.ENABLE_TRACKING': JSON.stringify(Boolean(branch === 'production')),
+      'process.env.ENABLE_TRACKING': JSON.stringify(
+        Boolean(branch === 'production')
+      ),
       'process.env.BRANCH': JSON.stringify(branch),
     }),
     customHtmlPlugin({
@@ -182,7 +186,7 @@ module.exports = {
           to: 'static/blocks-media',
           globOptions: {
             ignore: ['icons/set-*', 'icons/wedo_*', 'extensions/*'],
-          }
+          },
         },
         {
           from: 'assets/blocks-media',
@@ -192,7 +196,7 @@ module.exports = {
           from: 'static',
           to: 'static',
         },
-      ]
+      ],
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -200,7 +204,7 @@ module.exports = {
           from: '_redirects',
           transform: (content) => envsub(content.toString()),
         },
-      ]
+      ],
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
@@ -236,14 +240,14 @@ module.exports = {
     fallback: {
       path: false,
       crypto: false,
-      "stream": false,
-      "buffer": false,
+      stream: false,
+      buffer: false,
       fs: false,
       tls: false,
       net: false,
       zlib: false,
       http: false,
       https: false,
-    }
-  }
+    },
+  },
 }

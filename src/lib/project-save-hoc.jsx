@@ -185,7 +185,7 @@ const ProjectSaveHOC = (WrappedComponent) => {
     }
     setError(text) {
       this.setState({ error: text })
-      return Promise.reject(new Error(text))
+      return Promise.reject(new Error(text)).catch(() => {})
     }
     render() {
       /* eslint-disable no-unused-vars */
