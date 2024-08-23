@@ -12,13 +12,13 @@ import screenshotEditor from '../../../assets/img/screenshot_editor.png'
 import InlineSVG from '../inline-svg/inline-svg.jsx'
 
 import styles from './mobile-screen.css'
-import wdrLogo from '!raw-loader!../../../assets/img/wdr_logo.svg'
-import mausQuestion from '!raw-loader!../../../assets/img/maus_question.svg'
+import WdrLogo from '../../../assets/img/wdr_logo.svg?component'
+import MausQuestion from '../../../assets/img/maus_question.svg?component'
 
 const MobileScreenComponent = () => (
   <div className={styles.pageWrapper}>
     <div className={styles.logoWrapper}>
-      <InlineSVG className={styles.logoWdr} svg={wdrLogo} />
+      <InlineSVG className={styles.logoWdr} Svg={WdrLogo} />
     </div>
     <img
       role="heading"
@@ -130,7 +130,7 @@ const MobileScreenComponent = () => (
         />
       </Link>
     </div>
-    <InlineSVG className={styles.mausQuestion} svg={mausQuestion} />
+    <InlineSVG className={styles.mausQuestion} Svg={MausQuestion} />
     <Link className={styles.link} to="/inhalte/impressum">
       Impressum
     </Link>

@@ -10,7 +10,7 @@ const MenuButtonComponent = ({
   className,
   iconClassName,
   iconSrc,
-  iconSvg,
+  IconSvg,
   children,
   linkTo,
   external,
@@ -18,9 +18,9 @@ const MenuButtonComponent = ({
   onClick,
   ...props
 }) => {
-  const icon = iconSvg ? (
+  const icon = IconSvg ? (
     <InlineSVG
-      svg={iconSvg}
+      Svg={IconSvg}
       className={classNames(iconClassName, styles.icon)}
     />
   ) : (

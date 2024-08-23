@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import { setProjectName, setProjectId } from '../reducers/project'
 import log from './log'
 import storage from './storage'
+import { TextDecoder } from 'text-encoding'
 
 /* Higher Order Component to provide behavior for loading projects by id from
  * the window's hash (#this part in the url) or by projectId prop passed in from
@@ -25,7 +26,9 @@ const ProjectLoaderHOC = function (WrappedComponent) {
     }
 
     getProjectId(props) {
-      if (!props.match.params.eduId) return 0
+      if (!props.match.params.eduId && !props.match.params.projectId) return 0
+
+      if (props.match.params.projectId) return props.match.params.projectId
 
       if (props.match.path.includes('/lernspiel/')) {
         return `edu/${props.match.params.eduId}`
@@ -60,12 +63,17 @@ const ProjectLoaderHOC = function (WrappedComponent) {
             return
           }
 
+          const decodedData =
+            projectAsset.data.constructor == Uint8Array
+              ? new TextDecoder().decode(projectAsset.data)
+              : projectAsset.data.toString()
+
           this.setState({
-            projectData: projectAsset.data.toString(),
+            projectData: decodedData,
             fetchingProject: false,
           })
 
-          const data = JSON.parse(projectAsset.data.toString())
+          const data = JSON.parse(decodedData)
           if (data.custom) {
             this.props.setProjectName(data.custom.name)
           }
