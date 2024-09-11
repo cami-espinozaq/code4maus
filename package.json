@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "patch-package",
     "build": "webpack --bail",
-    "build:backend:netlify": "netlify-lambda build src/backend -c webpack.netlify-functions.js",
+    "build:backend:netlify": "webpack -c webpack.netlify-functions.js",
     "build:netlify": "yarn build && yarn build:backend:netlify",
     "build:patternlib": "build-storybook -o .patternlib",
     "build:printserver:win": "pkg -t node10-win --out-path dist/ scripts/print-server.js",
