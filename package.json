@@ -5,7 +5,7 @@
   "main": "./dist/scratch-gui.js",
   "scripts": {
     "postinstall": "patch-package",
-    "build": "webpack --colors --bail",
+    "build": "webpack --bail",
     "build:backend:netlify": "netlify-lambda build src/backend -c webpack.netlify-functions.js",
     "build:netlify": "yarn assets:netlify && yarn build && yarn build:backend:netlify",
     "build:patternlib": "build-storybook -o .patternlib",
