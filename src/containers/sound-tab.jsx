@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import bindAll from 'lodash.bindall'
-import { defineMessages, intlShape, injectIntl } from 'react-intl'
+import { defineMessages, injectIntl } from 'react-intl'
 import VM from 'scratch-vm'
 
 import { connect } from 'react-redux'
@@ -205,7 +205,7 @@ class SoundTab extends React.Component {
 
 SoundTab.propTypes = {
   editingTarget: PropTypes.string,
-  intl: intlShape,
+  intl: PropTypes.object,
   onNewSoundFromLibraryClick: PropTypes.func.isRequired,
   onNewSoundFromRecordingClick: PropTypes.func.isRequired,
   onRequestCloseSoundLibrary: PropTypes.func.isRequired,

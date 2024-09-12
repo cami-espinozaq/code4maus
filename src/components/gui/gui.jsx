@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import React from 'react'
-import { FormattedMessage, injectIntl, intlShape } from 'react-intl'
+import { FormattedMessage, injectIntl } from 'react-intl'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import tabStyles from 'react-tabs/style/react-tabs.css'
 import { Link } from 'react-router-dom'
@@ -357,7 +357,7 @@ GUIComponent.propTypes = {
   enableCommunity: PropTypes.bool,
   importInfoVisible: PropTypes.bool,
   saveProjectVisible: PropTypes.bool,
-  intl: intlShape.isRequired,
+  intl: PropTypes.object.isRequired,
   loading: PropTypes.bool,
   onActivateCostumesTab: PropTypes.func,
   onActivateSoundsTab: PropTypes.func,

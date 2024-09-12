@@ -34,6 +34,11 @@ import LazyRender from './lazy-render.jsx'
 import Content from './content.jsx'
 import MobileScreenFallback from './mobile-screen-fallback.jsx'
 
+// import '@formatjs/intl-pluralrules/polyfill'
+// import '@formatjs/intl-pluralrules/locale-data/de'
+// import '@formatjs/intl-relativetimeformat/polyfill'
+// import '@formatjs/intl-relativetimeformat/locale-data/de'
+
 addLocaleData(de)
 
 const lsKeyDeviceId = 'deviceId'
