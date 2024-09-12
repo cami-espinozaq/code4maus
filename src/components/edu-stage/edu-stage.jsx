@@ -166,7 +166,7 @@ const mapStateToProps = (state, ownProps) => {
   }
 
   const spec = gamesKeyed[base.gameId]
-  if (!base.isEnabled || base.slideIndex >= spec.slides.length) {
+  if (!base.isEnabled || !spec || base.slideIndex >= spec.slides.length) {
     return base
   }
 

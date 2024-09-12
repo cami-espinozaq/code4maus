@@ -10,7 +10,7 @@ const { GenerateSW } = require('workbox-webpack-plugin')
 
 // Custom Plugins
 const customHtmlPlugin = require('./scripts/custom-html-plugin')
-const GenerateS3SWPrecachePlugin = require('./scripts/generate-s3-sw-precache-plugin')
+// const { getAssetsList } = require('./scripts/generate-s3-sw-precache-plugin')
 
 const branch = process.env.BRANCH || process.env.TRAVIS_BRANCH
 const bucketSuffix = branch === 'production' ? 'prod' : 'staging'
@@ -107,28 +107,51 @@ module.exports = {
       },
       {
         test: /\.(png|wav|gif|jpg|mp4)$/,
-        loader: 'file-loader',
-        options: {
-          name: (file) => {
-            const matches = file.match(/\/src\/lib\/edu\/([a-zA-Z0-9]+)\//)
+        type: 'asset/resource',
+        exclude: [path.resolve(__dirname, 'assets/project-assets')],
+        generator: {
+          filename: (pathData) => {
+            const matches = pathData.filename.match(
+              /\/src\/lib\/edu\/([a-zA-Z0-9]+)\//
+            )
             if (matches !== null) {
-              return `edu/${matches[1]}/[hash].[ext]`
+              return `static/assets/edu/${matches[1]}/[hash][ext]`
             }
-            return '[hash].[ext]'
+            return 'static/assets/[hash][ext]'
           },
-          outputPath: 'static/assets/',
         },
       },
       {
         test: /\.svg$/,
+        issuer: /\.[jt]sx?$/,
+        resourceQuery: /component/, // *.svg?component
         use: [
           {
-            loader: 'file-loader',
+            loader: '@svgr/webpack',
             options: {
-              outputPath: 'static/assets/',
+              outDir: 'static/assets',
+              icon: true,
+              dimensions: false,
             },
           },
         ],
+      },
+      {
+        test: /\.svg$/,
+        type: 'asset/source',
+        include: [path.resolve(__dirname, 'assets/project-assets')],
+        resourceQuery: /raw/, // *.svg?raw
+        generator: {
+          filename: 'static/assets/[hash][ext]',
+        },
+      },
+      {
+        test: /\.svg$/i,
+        type: 'asset/resource',
+        resourceQuery: { not: [/component/, /raw/] },
+        generator: {
+          filename: 'static/assets/[hash][ext]',
+        },
       },
       {
         test: /\.md$/,
@@ -213,25 +236,45 @@ module.exports = {
     enableServiceWorker
       ? [
           new GenerateSW({
-            importWorkboxFrom: 'local',
             navigateFallback: '/index.html',
-            navigateFallbackBlacklist: [/^\/data\//],
+            navigateFallbackDenylist: [/^\/data\//],
             exclude: [
               /\.map$/,
               /^manifest.*\.js$/,
               /_redirects$/,
-              /data\/projects\/[^/]+\/index\.json$/,
               /\/1x1\.gif$/,
               /^static\/assets\/edu\/beispiel/,
             ],
+            runtimeCaching: [
+              {
+                urlPattern: ({ url }) => {
+                  return (
+                    url.pathname.startsWith('/data/assets/') ||
+                    url.pathname.startsWith('/static/assets')
+                  )
+                },
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'assets',
+                  cacheableResponse: {
+                    statuses: [0, 200],
+                  },
+                },
+              },
+              {
+                urlPattern: new RegExp(/data\/projects\/[^/]+\/index\.json$/),
+                handler: 'NetworkFirst',
+                options: {
+                  cacheName: 'projects',
+                },
+              },
+            ],
             clientsClaim: true,
             skipWaiting: true,
-            importScripts: ['s3-manifest.[hash].js', '/static/sw-helper.js'],
+            importScripts: ['/static/sw-helper.js'],
             cleanupOutdatedCaches: true,
             excludeChunks: ['settings', 'sharingpage', 'mobile-screen'],
-          }),
-          new GenerateS3SWPrecachePlugin({
-            filename: 's3-manifest.[hash].js',
+            maximumFileSizeToCacheInBytes: 19 * 1024 * 1024,
           }),
         ]
       : []

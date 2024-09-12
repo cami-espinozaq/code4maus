@@ -9,9 +9,9 @@ import Fullscreen from '../../containers/fullscreen.jsx'
 import MenuButton from '../menu-button/menu-button.jsx'
 
 import styles from './stage-header.css'
-import saveIcon from '!raw-loader!../../../assets/icons/header_save.svg'
-import menuIcon from '!raw-loader!../../../assets/icons/header_menu.svg'
-import mailIcon from '!raw-loader!../../../assets/icons/menu_impressum.svg'
+import SaveIcon from '../../../assets/icons/header_save.svg?component'
+import MenuIcon from '../../../assets/icons/header_menu.svg?component'
+import MailIcon from '../../../assets/icons/menu_impressum.svg?component'
 
 const StageHeaderComponent = function (props) {
   const { isFullScreen, onSaveProject, vm, logPageInfo } = props
@@ -43,7 +43,7 @@ const StageHeaderComponent = function (props) {
             <div className={styles.menuWrapper} role="navigation">
               <MenuButton
                 orientation="vertical"
-                iconSvg={mailIcon}
+                IconSvg={MailIcon}
                 external
                 linkTo="mailto:maus@wdr.de"
               >
@@ -52,7 +52,7 @@ const StageHeaderComponent = function (props) {
               <MenuButton
                 orientation="vertical"
                 id="save"
-                iconSvg={saveIcon}
+                IconSvg={SaveIcon}
                 onClick={onSaveProject}
               >
                 Speichern
@@ -61,7 +61,7 @@ const StageHeaderComponent = function (props) {
                 orientation="vertical"
                 linkTo="/"
                 className={styles.headerIcon}
-                iconSvg={menuIcon}
+                IconSvg={MenuIcon}
               >
                 Übersicht
               </MenuButton>

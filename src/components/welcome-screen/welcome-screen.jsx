@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import Button from '../button/button.jsx'
@@ -11,17 +11,21 @@ import styles from './welcome-screen.css'
 import { paEvent } from '../../lib/piano-analytics/main.js'
 
 const WelcomeScreenComponent = () => {
-
   useEffect(() => {
     paEvent.pageDisplay({
       pages: ['Willkommensseite'],
-      pageType: 'Onboarding'
+      pageType: 'Onboarding',
     })
   }, [])
 
   return (
     <div className={styles.container}>
-      <img alt="WDR" className={styles.wdrLogo} draggable={false} src={wdrLogo} />
+      <img
+        alt="WDR"
+        className={styles.wdrLogo}
+        draggable={false}
+        src={wdrLogo}
+      />
 
       <div className={styles.wrapper}>
         <div className={styles.innerWrapper}>
@@ -42,7 +46,9 @@ const WelcomeScreenComponent = () => {
                 Fang am besten mit unserem ersten Lernspiel an.
               </div>
               <Button style="primary">
-                <div style={{ whiteSpace: 'nowrap' }}>Lernen, wie es geht ‣</div>
+                <div style={{ whiteSpace: 'nowrap' }}>
+                  Lernen, wie es geht ‣
+                </div>
               </Button>
             </div>
 

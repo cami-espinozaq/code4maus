@@ -46,7 +46,7 @@ export const SHAPE_PROJECT = {
   key: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   note: PropTypes.string,
-  image: PropTypes.boolean,
+  image: PropTypes.string,
   video: PropTypes.string,
   linkTo: PropTypes.string,
 }
