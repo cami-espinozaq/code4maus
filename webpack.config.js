@@ -6,12 +6,11 @@ const envsub = require('envsubstr')
 
 // Plugins
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const Visualizer = require('webpack-visualizer-plugin')
 const { GenerateSW } = require('workbox-webpack-plugin')
 
 // Custom Plugins
 const customHtmlPlugin = require('./scripts/custom-html-plugin')
-const GenerateS3SWPrecachePlugin = require('./scripts/generate-s3-sw-precache-plugin')
+// const { getAssetsList } = require('./scripts/generate-s3-sw-precache-plugin')
 
 const branch = process.env.BRANCH || process.env.TRAVIS_BRANCH
 const bucketSuffix = branch === 'production' ? 'prod' : 'staging'
@@ -36,12 +35,23 @@ module.exports = {
   mode: isEnvProduction ? 'production' : 'development',
   devtool: 'source-map',
   devServer: {
-    contentBase: path.resolve(__dirname, 'build'),
+    static: {
+      directory: path.join(__dirname, 'build'),
+      watch:
+        process.env.DOCKER_WATCH === 1
+          ? {
+              aggregateTimeout: 300,
+              poll: 1000,
+            }
+          : {},
+    },
     host: '0.0.0.0',
     port: process.env.PORT || 8601,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3000/dev',
+        changeOrigin: true,
+        secure: false,
       },
       '/data': {
         target: bucketUrl,
@@ -49,13 +59,6 @@ module.exports = {
       },
     },
     historyApiFallback: true,
-    watchOptions:
-      process.env.DOCKER_WATCH === 1
-        ? {
-            aggregateTimeout: 300,
-            poll: 1000,
-          }
-        : {},
   },
   entry: {
     app: './src/entrypoints/index.jsx',
@@ -67,6 +70,7 @@ module.exports = {
     filename: '[name].[contenthash].js',
     publicPath: '/',
   },
+  target: 'web',
   module: {
     rules: [
       {
@@ -103,50 +107,81 @@ module.exports = {
       },
       {
         test: /\.(png|wav|gif|jpg|mp4)$/,
-        loader: 'file-loader',
-        options: {
-          name: (file) => {
-            const matches = file.match(/\/src\/lib\/edu\/([a-zA-Z0-9]+)\//)
+        type: 'asset/resource',
+        exclude: [path.resolve(__dirname, 'assets/project-assets')],
+        generator: {
+          filename: (pathData) => {
+            const matches = pathData.filename.match(
+              /\/src\/lib\/edu\/([a-zA-Z0-9]+)\//
+            )
             if (matches !== null) {
-              return `edu/${matches[1]}/[hash].[ext]`
+              return `static/assets/edu/${matches[1]}/[hash][ext]`
             }
-            return '[hash].[ext]'
+            return 'static/assets/[hash][ext]'
           },
-          outputPath: 'static/assets/',
         },
       },
       {
         test: /\.svg$/,
+        issuer: /\.[jt]sx?$/,
+        resourceQuery: /component/, // *.svg?component
         use: [
           {
-            loader: 'file-loader',
+            loader: '@svgr/webpack',
             options: {
-              outputPath: 'static/assets/',
+              outDir: 'static/assets',
+              icon: true,
+              dimensions: false,
             },
           },
-          'svgo-loader',
         ],
+      },
+      {
+        test: /\.svg$/,
+        type: 'asset/source',
+        include: [path.resolve(__dirname, 'assets/project-assets')],
+        resourceQuery: /raw/, // *.svg?raw
+        generator: {
+          filename: 'static/assets/[hash][ext]',
+        },
+      },
+      {
+        test: /\.svg$/i,
+        type: 'asset/resource',
+        resourceQuery: { not: [/component/, /raw/] },
+        generator: {
+          filename: 'static/assets/[hash][ext]',
+        },
       },
       {
         test: /\.md$/,
         use: ['babel-loader', 'react-markdown-loader'],
       },
       {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto',
+      },
+      {
         test: require.resolve('zepto'),
-        loader: 'imports-loader?this=>window',
+        use: [
+          {
+            loader: 'imports-loader',
+            options: 'this=>window',
+          },
+        ],
       },
     ],
   },
   optimization: {
-    splitChunks: {
-      chunks: 'all',
-    },
+    runtimeChunk: 'single',
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      'process.env.DEBUG': Boolean(process.env.DEBUG),
-      'process.env.ENABLE_TRACKING': Boolean(branch === 'production'),
+      'process.env.DEBUG': 'process.env.DEBUG',
+      'process.env.ENABLE_TRACKING': JSON.stringify(
+        Boolean(branch === 'production')
+      ),
       'process.env.BRANCH': JSON.stringify(branch),
     }),
     customHtmlPlugin({
@@ -163,59 +198,99 @@ module.exports = {
       filename: 'settings/index.html',
       title: 'Einstellungen | Programmieren mit der Maus',
     }),
-    new CopyWebpackPlugin([
-      {
-        from: 'assets/img/favicon.png',
-        to: '',
-      },
-      {
-        from: 'node_modules/scratch-blocks/media',
-        to: 'static/blocks-media',
-        ignore: ['icons/set-*', 'icons/wedo_*', 'extensions/*'],
-      },
-      {
-        from: 'assets/blocks-media',
-        to: 'static/blocks-media',
-      },
-      {
-        from: 'static',
-        to: 'static',
-      },
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: '_redirects',
-        transform: (content) => envsub(content.toString()),
-      },
-    ]),
-    new Visualizer({
-      filename: 'statistics.html',
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'assets/img/favicon.png',
+          to: '',
+        },
+        {
+          from: 'node_modules/scratch-blocks/media',
+          to: 'static/blocks-media',
+          globOptions: {
+            ignore: ['icons/set-*', 'icons/wedo_*', 'extensions/*'],
+          },
+        },
+        {
+          from: 'assets/blocks-media',
+          to: 'static/blocks-media',
+        },
+        {
+          from: 'static',
+          to: 'static',
+        },
+      ],
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: '_redirects',
+          transform: (content) => envsub(content.toString()),
+        },
+      ],
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
     }),
   ].concat(
     enableServiceWorker
       ? [
           new GenerateSW({
-            importWorkboxFrom: 'local',
             navigateFallback: '/index.html',
-            navigateFallbackBlacklist: [/^\/data\//],
+            navigateFallbackDenylist: [/^\/data\//],
             exclude: [
               /\.map$/,
               /^manifest.*\.js$/,
               /_redirects$/,
-              /data\/projects\/[^/]+\/index\.json$/,
               /\/1x1\.gif$/,
               /^static\/assets\/edu\/beispiel/,
             ],
+            runtimeCaching: [
+              {
+                urlPattern: ({ url }) => {
+                  return (
+                    url.pathname.startsWith('/data/assets/') ||
+                    url.pathname.startsWith('/static/assets')
+                  )
+                },
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'assets',
+                  cacheableResponse: {
+                    statuses: [0, 200],
+                  },
+                },
+              },
+              {
+                urlPattern: new RegExp(/data\/projects\/[^/]+\/index\.json$/),
+                handler: 'NetworkFirst',
+                options: {
+                  cacheName: 'projects',
+                },
+              },
+            ],
             clientsClaim: true,
             skipWaiting: true,
-            importScripts: ['s3-manifest.[hash].js', '/static/sw-helper.js'],
+            importScripts: ['/static/sw-helper.js'],
             cleanupOutdatedCaches: true,
             excludeChunks: ['settings', 'sharingpage', 'mobile-screen'],
-          }),
-          new GenerateS3SWPrecachePlugin({
-            filename: 's3-manifest.[hash].js',
+            maximumFileSizeToCacheInBytes: 19 * 1024 * 1024,
           }),
         ]
       : []
   ),
+  resolve: {
+    fallback: {
+      path: false,
+      crypto: false,
+      stream: false,
+      buffer: false,
+      fs: false,
+      tls: false,
+      net: false,
+      zlib: false,
+      http: false,
+      https: false,
+    },
+  },
 }

@@ -52,8 +52,10 @@ class GUI extends React.Component {
       logPageDisplay(null, this.props.isNewProject)
     }
 
-    if (this.props.eduId && this.props.eduId !== prevProps.eduId) {
-      logPageDisplay(this.props.eduId, false)
+    const eduId = this.props.match.params.eduId
+    const prevEduId = prevProps.match.params.eduId
+    if (eduId && eduId !== prevEduId) {
+      logPageDisplay(eduId, false)
     }
 
     if (
@@ -105,6 +107,9 @@ class GUI extends React.Component {
       loadingStateVisible,
       onSetUnchanged, // eslint-disable-line no-unused-vars
       projectData, // eslint-disable-line no-unused-vars
+      isNewProject, // eslint-disable-line no-unused-vars
+      staticContext, // eslint-disable-line no-unused-vars
+      dispatch, // eslint-disable-line no-unused-vars
       vm,
       ...componentProps
     } = this.props
@@ -150,8 +155,9 @@ const mapStateToProps = (state) => ({
   layoutmode: state.scratchGui.layoutMode,
   saveProjectVisible: state.scratchGui.modals.saveProject,
   eduLayerActive: state.scratchGui.eduLayer.enabled,
-  eduId: state.scratchGui.eduLayer.gameId,
-  isNewProject: state.router.result && !!state.router.result.newProject
+  // eduId: state.scratchGui.eduLayer.gameId,
+  isNewProject:
+    state.router.location.state && !!state.router.location.state.isNewProject,
 })
 
 const logPageDisplay = (eduId, isNewProject, tab) => {
@@ -176,6 +182,8 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  const eduId = ownProps.match.params.eduId
+
   return {
     ...ownProps,
     ...stateProps,
@@ -186,7 +194,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   }
 }
 
-const ConnectedGUI = connect(mapStateToProps, mapDispatchToProps, mergeProps)(GUI)
+const ConnectedGUI = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
+)(GUI)
 
 // eslint-disable-next-line new-cap
 const WrappedGui = flow([

@@ -10,8 +10,6 @@ const s3 = initS3(customEndpoint)
 export const handler = async (event) => {
   const { filename } = JSON.parse(event.body)
 
-  console.log("filename for handler", filename)
-
   if (!filename) {
     return respond.error(400, "Missing request body key 'filename'.")
   }
@@ -20,8 +18,6 @@ export const handler = async (event) => {
     Bucket: process.env.STORAGE_BUCKET || process.env.S3_BUCKET_PROJECTS,
     Key: `data/assets/${filename}`,
   }
-
-  console.log("params", params)
 
   try {
     await s3.headObject(params).promise()
