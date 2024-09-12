@@ -41,3 +41,6 @@ yarn-error.log
 
 # Jupyter Checkpoints
 .ipynb_checkpoints/
+
+# docker-compose
+docker-compose.yml
