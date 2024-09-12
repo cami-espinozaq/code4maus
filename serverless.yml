@@ -38,7 +38,9 @@ resources:
     AppBucket:
       Type: 'AWS::S3::Bucket'
       Properties:
-        AccessControl: PublicRead
+        AccessControl: Private
+        PublicAccessBlockConfiguration:
+          BlockPublicPolicy: false
         BucketName: ${self:custom.appBucketName}
         WebsiteConfiguration:
           IndexDocument: index.html
@@ -47,7 +49,9 @@ resources:
     ProjectBucket:
       Type: 'AWS::S3::Bucket'
       Properties:
-        AccessControl: PublicRead
+        AccessControl: Private
+        PublicAccessBlockConfiguration:
+          BlockPublicPolicy: false
         BucketName: ${self:custom.projectBucketName}
         CorsConfiguration:
           CorsRules:
