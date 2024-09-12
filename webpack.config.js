@@ -132,6 +132,11 @@ module.exports = {
         use: ['babel-loader', 'react-markdown-loader'],
       },
       {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto'
+      },
+      {
         test: require.resolve('zepto'),
         loader: 'imports-loader?this=>window',
       },

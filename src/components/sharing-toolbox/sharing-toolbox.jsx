@@ -77,9 +77,10 @@ const usePrintScreenshot = (layoutRef, dispatch) => {
       w: 73,
       h: 73,
     })
-    const pdf = doc.output('blob')
     try {
-      await printPdf(pdf)
+      doc.output('blob')
+      doc.save('code4maus.pdf')
+
       dispatch({ type: actionPrintFinished })
     } catch (e) {
       dispatch({ type: actionError, payload: e.message })
@@ -120,19 +121,6 @@ const useSaveResult = (asset, dispatch) =>
       dispatch({ type: actionError, payload: e.message })
     }
   }, [dispatch, asset])
-
-const printPdf = async (buffer) => {
-  const url = 'http://localhost:8602'
-  const formData = new FormData()
-  formData.append('button', buffer)
-  const response = await fetch(url, {
-    method: 'POST',
-    body: formData,
-  })
-  if (!response.ok) {
-    throw new Error(await response.text())
-  }
-}
 
 const initialState = {
   mode: 'default',
@@ -261,7 +249,7 @@ const SharingModal = ({
               className={styles.nameInput}
               placeholder="Dein Name oder Twitter Name"
               value={userHandle}
-              maxlength={20}
+              maxLength={20}
             />
             <Button disabled={pending} onClick={print}>
               <img
